@@ -10,13 +10,9 @@ from kivy.uix.scrollview import ScrollView
 from instructions import txt_instruction, txt_test1, txt_test2, txt_test3, txt_sits
 from ruffier import test
 
-from kivy.properties import NumericProperty, BooleanProperty
-from kivy.animation import Animation
-from kivy.clock import Clock
-
-# from seconds import Seconds
-# from sits import Sits
-# from runner import Runner
+from seconds import Seconds
+from sits import Sits
+from runner import Runner
 
 Window.clearcolor = (.87, 0.54, 0.8, 0.3)
 btn_color = (0.98, 0.31, 0.8, 1)
@@ -275,78 +271,3 @@ class HeartCheck(App):
  
 app = HeartCheck()
 app.run()
-
-''' НЕОБХОДИМО СДЕЛАТЬ ДЕКОМПОЗИЦИЮ!!! '''
-
-class Seconds(Label):
-    done = BooleanProperty(False)
-    
-    def __init__(self, total, **kwargs):
-        self.done = False
-        self.current = 0
-        self.total = total
-        my_text = "Прошло секунд: " + str(self.current)
-        super().__init__(text=my_text)
-
-    def restart(self, total, **kwargs):
-        self.done = False
-        self.total = total
-        self.current = 0
-        self.text = "Прошло секунд: " + str(self.current)
-        self.start()
-
-    def start(self):
-        Clock.schedule_interval(self.change, 1)
-
-    def change(self, dt):
-        self.current += 1
-        self.text = "Прошло секунд: " + str(self.current)
-        if self.current >= self.total:
-            self.done = True
-            return False
-        
-class Sits(Label):
-    def __init__(self, total, **kwargs):
-        self.current = 0
-        self.total = total
-        my_text = "Осталось приседаний: " + str(self.total) 
-        super().__init__(text=my_text, **kwargs)
-
-    def next(self, *args):
-        self.current += 1
-        remain = max(0, self.total - self.current)
-        my_text = "Осталось приседаний: " + str(remain) 
-        self.text=my_text
-
-class Runner(BoxLayout):
-    value = NumericProperty(0) #сколько сделано перемещений
-    finished = BooleanProperty(False) #сделаны ли все перемещения
-
-    def __init__(self, 
-                total=10,  steptime=1,
-                **kwargs):
-
-        super().__init__(**kwargs)
-
-        self.total = total
-        self.btext_inprogress = 'Приседание'
-        self.animation = (Animation(pos_hint={'top': 0.1}, duration=steptime/2) 
-                        + Animation(pos_hint={'top': 1.0}, duration=steptime/2))
-        self.animation.repeat = True
-        self.animation.on_progress = self.next
-        self.btn = Button(size_hint=(1, 0.1), pos_hint={'top': 1.0}, background_color=(0.73, 0.15, 0.96, 1))
-        self.add_widget(self.btn)
-
-    def start(self):
-        self.value = 0
-        self.finished = False
-        self.btn.text = self.btext_inprogress 
-        self.animation.repeat = True
-        self.animation.start(self.btn)
-
-    def next(self, widget, step):
-        if step == 1.0:
-            self.value += 1
-            if self.value >= self.total:
-                self.animation.repeat = False
-                self.finished = True
